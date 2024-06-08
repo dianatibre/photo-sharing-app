@@ -1,5 +1,3 @@
-// db.js
-
 const sqlite3 = require('sqlite3').verbose();
 
 // Connect to SQLite database (or create it if it doesn't exist)
@@ -11,17 +9,30 @@ const db = new sqlite3.Database('./photo-sharing.db', (err) => {
     }
 });
 
-module.exports = db;
-
 // Define database schema
 db.serialize(() => {
+    // Create users table
+    db.run(`CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL
+    )`);
+
+    // !(remove this in production)
+    db.run(`INSERT OR IGNORE INTO users (email, password) VALUES
+        ('diana.tibre@gmail.com', '1234')
+    `);
+
+    // Create galleries table
     db.run(`CREATE TABLE IF NOT EXISTS galleries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
-        description TEXT,
+        coverPhoto TEXT,
+        date DATETIME DEFAULT CURRENT_TIMESTAMP,
         accessLink TEXT UNIQUE
     )`);
 
+    // Create photos table
     db.run(`CREATE TABLE IF NOT EXISTS photos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         galleryId INTEGER NOT NULL,

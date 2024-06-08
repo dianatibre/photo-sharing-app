@@ -1,6 +1,6 @@
 const express = require('express');
 const session = require('express-session');
-const path = require('path'); // Import the path module
+const db = require('./db'); // Import the SQLite database connection
 const app = express();
 const port = 3000;
 
@@ -12,22 +12,39 @@ app.use(session({
     saveUninitialized: true
 }));
 
-// Serve static files from the "public" directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files
+app.use(express.static('public'));
 
-// Routes
-const authRoutes = require('./routes/authRoutes');
-const galleryRoutes = require('./routes/galleryRoutes');
-const uploadRoutes = require('./routes/uploadRoutes');
+// Login route
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
 
-app.use(authRoutes);
-app.use('/galleries', galleryRoutes);
-app.use('/upload', uploadRoutes);
+    // Query the database to check if the user exists and the password is correct
+    const query = 'SELECT * FROM users WHERE email = ?';
+    db.get(query, [email], (err, user) => {
+        if (err) {
+            console.error('Error querying database:', err.message);
+            return res.status(500).send('Internal Server Error');
+        }
 
-// Error Handling Middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
+        if (!user || user.password !== password) {
+            return res.status(401).send('Invalid email or password');
+        }
+
+        req.session.user = email; // Set session to indicate user is logged in
+        res.redirect('/galleries'); // Redirect to galleries page after successful login
+    });
+});
+
+// Galleries route
+app.get('/galleries', (req, res) => {
+    // Check if user is logged in
+    if (!req.session.user) {
+        return res.redirect('/login'); // Redirect to login page if user is not logged in
+    }
+
+    // Render galleries page with list of galleries
+    res.render('galleries', { username: req.session.user });
 });
 
 // Start the server
