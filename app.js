@@ -29,13 +29,6 @@ const galleryRoutes = require('./routes/galleryRoutes');
 app.use(authRoutes);
 app.use(galleryRoutes);
 
-// Route for updating a specific gallery
-app.post('/gallery/:id', (req, res) => {
-    // Logic to update the gallery details in the database based on ID
-    // Redirect back to the gallery management page or main management page
-});
-
-
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
