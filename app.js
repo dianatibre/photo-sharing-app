@@ -23,26 +23,9 @@ const sqlite3 = require('sqlite3').verbose();
 // Create a new SQLite database connection
 const db = new sqlite3.Database('./photo-sharing.db');
 
-// Login route
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-
-    // Query the database to check if the user exists and the password is correct
-    const query = 'SELECT * FROM users WHERE email = ?';
-    db.get(query, [email], (err, user) => {
-        if (err) {
-            console.error('Error querying database:', err.message);
-            return res.status(500).send('Internal Server Error');
-        }
-
-        if (!user || user.password !== password) {
-            return res.status(401).send('Invalid email or password');
-        }
-
-        req.session.user = email; // Set session to indicate user is logged in
-        res.redirect('/manage-galleries'); // Redirect to galleries page after successful login
-    });
-});
+// Import authRoutes
+const authRoutes = require('./routes/authRoutes');
+app.use(authRoutes);
 
 // Route for rendering the page with galleries
 app.get('/manage-galleries', (req, res) => {

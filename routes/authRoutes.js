@@ -1,50 +1,30 @@
 const express = require('express');
 const router = express.Router();
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./photo-sharing.db'); // Define db connection
 
 // Fake user database (replace with a real database)
 const users = [];
 
-// Signup route
-router.post('/signup', (req, res) => {
-    const { username, password } = req.body;
-
-    // Check if username already exists
-    const existingUser = users.find(user => user.username === username);
-    if (existingUser) {
-        return res.status(400).json({ error: 'Username already exists' });
-    }
-
-    // Hash the password
-    const hashedPassword = bcrypt.hashSync(password, 10);
-
-    // Create a new user
-    const newUser = { username, password: hashedPassword };
-    users.push(newUser);
-
-    // Set session data to indicate user is logged in
-    req.session.user = username;
-
-    // Redirect or send response as needed
-    res.redirect('/');
-});
-
 // Login route
 router.post('/login', (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    // Find user in the database
-    const user = users.find(user => user.username === username);
+    // Query the database to check if the user exists and the password is correct
+    const query = 'SELECT * FROM users WHERE email = ?';
+    db.get(query, [email], (err, user) => {
+        if (err) {
+            console.error('Error querying database:', err.message);
+            return res.status(500).send('Internal Server Error');
+        }
 
-    // Check if user exists and password is correct
-    if (!user || !bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ error: 'Invalid username or password' });
-    }
+        if (!user || user.password !== password) {
+            return res.status(401).send('Invalid email or password');
+        }
 
-    // Set session data to indicate user is logged in
-    req.session.user = username;
-
-    // Redirect or send response as needed
-    res.redirect('/');
+        req.session.user = email; // Set session to indicate user is logged in
+        res.redirect('/manage-galleries'); // Redirect to galleries page after successful login
+    });
 });
 
 // Logout route
