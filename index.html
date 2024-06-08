@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Sharing App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+    <div class="container">
+        <h1>Photo Sharing App</h1>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#upload">Upload Photo</a></li>
+                <li><a href="#login">Login</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section id="home" class="section">
+        <div class="container">
+            <h2>Recent Galleries</h2>
+            <!-- Gallery thumbnails will be dynamically generated here -->
+        </div>
+    </section>
+
+    <section id="upload" class="section">
+        <div class="container">
+            <h2>Upload Photo</h2>
+            <form>
+                <input type="text" name="title" placeholder="Title" required>
+                <input type="file" name="photo" accept="image/*" required>
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="login" class="section">
+        <div class="container">
+            <h2>Login</h2>
+            <form>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2024 Photo Sharing App</p>
+    </div>
+</footer>
+</body>
+</html>
