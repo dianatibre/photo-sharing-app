@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./photo-sharing.db'); // Define db connection
+const db = new sqlite3.Database('./photo-sharing.db');
 
 // Fake user database (replace with a real database)
 const users = [];

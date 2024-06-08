@@ -1,37 +1,64 @@
 const express = require('express');
 const router = express.Router();
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./photo-sharing.db');
 
-// Placeholder storage for galleries (replace with actual storage solution)
-const galleries = [];
+// Route for rendering the page with galleries
+router.get('/manage-galleries', (req, res) => {
+    // Fetch galleries from the database
+    db.all('SELECT * FROM galleries', (err, rows) => {
+        if (err) {
+            console.error('Error fetching galleries:', err.message);
+            return res.status(500).send('Internal Server Error');
+        }
 
-// List all galleries
-router.get('/', (req, res) => {
-    res.json(galleries);
+        // Render the page with fetched galleries and username
+        res.render('manage-galleries', { galleries: rows, username: req.session.user });
+    });
 });
 
-// Create a new gallery
-router.post('/', (req, res) => {
-    const { name } = req.body;
-    if (!name) {
-        return res.status(400).json({ error: 'Gallery name is required' });
+// Route for creating a new gallery
+router.post('/create-gallery', (req, res) => {
+    // Check if user is logged in
+    if (!req.session.user) {
+        return res.status(401).send('Unauthorized');
     }
 
-    // Create a new gallery object and add it to the galleries array
-    const newGallery = { id: galleries.length + 1, name };
-    galleries.push(newGallery);
+    const { galleryTitle, galleryDate } = req.body;
 
-    // Redirect or send response as needed
-    res.status(201).json({ message: 'Gallery created successfully', gallery: newGallery });
+    // Validate input (gallery title and date)
+    if (!galleryTitle || !galleryDate) {
+        return res.status(400).send('Gallery title and date are required');
+    }
+
+    // Insert the new gallery into the database with the selected date
+    db.run('INSERT INTO galleries (title, date) VALUES (?, ?)', [galleryTitle, galleryDate], (err) => {
+        if (err) {
+            console.error('Error creating gallery:', err.message);
+            return res.status(500).send('Internal Server Error');
+        }
+        res.redirect('/manage-galleries'); // Redirect to manage galleries page after successful creation
+    });
 });
 
 // View gallery details by ID
-router.get('/:id', (req, res) => {
-    const galleryId = parseInt(req.params.id);
-    const gallery = galleries.find(gallery => gallery.id === galleryId);
-    if (!gallery) {
-        return res.status(404).json({ error: 'Gallery not found' });
-    }
-    res.json(gallery);
+router.get('/gallery/:id', (req, res) => {
+    const galleryId = req.params.id;
+
+    // Query the database to retrieve the gallery details
+    db.get('SELECT * FROM galleries WHERE id = ?', [galleryId], (err, gallery) => {
+        if (err) {
+            console.error('Error retrieving gallery:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        if (!gallery) {
+            return res.status(404).json({ error: 'Gallery not found' });
+        }
+
+        // Gallery found, send it as a response
+        res.json(gallery);
+    });
 });
 
 module.exports = router;
