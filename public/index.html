@@ -28,24 +28,14 @@
         </div>
     </section>
 
-    <section id="upload" class="section">
-        <div class="container">
-            <h2>Upload Photo</h2>
-            <form>
-                <input type="text" name="title" placeholder="Title" required>
-                <input type="file" name="photo" accept="image/*" required>
-                <button type="submit">Upload</button>
-            </form>
-        </div>
-    </section>
-
     <section id="login" class="section">
         <div class="container">
             <h2>Login</h2>
-            <form>
+            <form id="loginForm" action="/login" method="POST">
                 <input type="email" name="email" placeholder="Email" required>
                 <input type="password" name="password" placeholder="Password" required>
                 <button type="submit">Login</button>
+                <div id="loginMessage"></div> <!-- Placeholder for displaying login messages -->
             </form>
         </div>
     </section>
@@ -56,5 +46,8 @@
         <p>&copy; 2024 Photo Sharing App</p>
     </div>
 </footer>
+
+<!-- Include your JavaScript code here to handle login and show/hide the upload section -->
+<script src="script.js"></script>
 </body>
 </html>
