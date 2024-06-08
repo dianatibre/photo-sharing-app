@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Galleries</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../public/styles.css">
 </head>
 <body>
 <h1>Manage Galleries</h1>
@@ -17,6 +17,9 @@
                 <%= gallery.title %>
             </a>
             <span><%= gallery.date %></span>
+            <a href="/gallery/<%= gallery.id %>/manage-gallery">
+                Manage Gallery
+            </a>
         </li>
     <% }) %>
 </ul>
