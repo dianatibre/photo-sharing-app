@@ -90,6 +90,33 @@ function formatDate(date) {
     return `${day}/${month}/${year}`;
 }
 
+// Route to get details of a specific gallery by ID
+app.get('/gallery/:id', (req, res) => {
+    const galleryId = req.params.id;
+
+    // Query the database to retrieve the gallery details
+    db.get('SELECT * FROM galleries WHERE id = ?', [galleryId], (err, gallery) => {
+        if (err) {
+            console.error('Error retrieving gallery:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        if (!gallery) {
+            return res.status(404).json({ error: 'Gallery not found' });
+        }
+
+        // Gallery found, send it as a response
+        res.json(gallery);
+    });
+});
+
+// Route for updating a specific gallery
+app.post('/gallery/:id', (req, res) => {
+    // Logic to update the gallery details in the database based on ID
+    // Redirect back to the gallery management page or main management page
+});
+
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
