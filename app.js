@@ -1,9 +1,19 @@
 // app.js
 
 const express = require('express');
+const session = require('express-session');
+const bcrypt = require('bcrypt');
 const app = express();
 const port = 3000;
 const db = require('./db');
+
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(session({
+    secret: 'secret-key', // Change this to a secure random string
+    resave: false,
+    saveUninitialized: true
+}));
 
 // Serve static files from the "public" directory
 app.use(express.static('public'));
@@ -105,4 +115,55 @@ app.post('/galleries/:galleryId/photos', upload.single('photo'), (req, res) => {
             res.json({ id: this.lastID });
         }
     });
+});
+
+// Fake user database (replace with a real database)
+const users = [];
+
+// Signup route
+app.post('/signup', (req, res) => {
+    const { username, password } = req.body;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    users.push({ username, password: hashedPassword });
+    req.session.user = username;
+    res.redirect('/');
+});
+
+// Login route
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const user = users.find(user => user.username === username);
+    if (user && bcrypt.compareSync(password, user.password)) {
+        req.session.user = username;
+        res.redirect('/');
+    } else {
+        res.send('Invalid username or password');
+    }
+});
+
+// Logout route
+app.post('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Error destroying session:', err);
+        }
+        res.redirect('/');
+    });
+});
+
+// Other routes...
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});
+
+app.get('/upload', (req, res) => {
+    if (req.session.user) {
+        // User is logged in, allow access to the upload page
+        res.sendFile(__dirname + '/upload.html');
+    } else {
+        // User is not logged in, redirect to login page
+        res.redirect('/login');
+    }
 });
