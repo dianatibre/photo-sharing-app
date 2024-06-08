@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Galleries</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h1>Manage Galleries</h1>
+<h2>Welcome <%= username %>!</h2>
+<h3>Existing Galleries</h3>
+<ul>
+    <% galleries.forEach(gallery => { %>
+        <li>
+            <a href="/gallery/<%= gallery.id %>">
+                <%= gallery.title %>
+            </a>
+            <span><%= gallery.date %></span>
+        </li>
+    <% }) %>
+</ul>
+<h3>Create New Gallery</h3>
+<form action="/create-gallery" method="post">
+    <label for="galleryTitle">Gallery Title:</label>
+    <input type="text" id="galleryTitle" name="galleryTitle" required>
+    <label for="galleryDate">Gallery Date:</label>
+    <input type="date" id="galleryDate" name="galleryDate" required>
+    <button type="submit">Create Gallery</button>
+</form>
+</body>
+</html>

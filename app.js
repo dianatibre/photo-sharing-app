@@ -1,6 +1,5 @@
 const express = require('express');
 const session = require('express-session');
-const db = require('./db'); // Import the SQLite database connection
 const app = express();
 const port = 3000;
 
@@ -17,6 +16,12 @@ app.use(session({
 
 // Serve static files
 app.use(express.static('public'));
+
+// Require the sqlite3 module
+const sqlite3 = require('sqlite3').verbose();
+
+// Create a new SQLite database connection
+const db = new sqlite3.Database('./photo-sharing.db');
 
 // Login route
 app.post('/login', (req, res) => {
@@ -35,20 +40,55 @@ app.post('/login', (req, res) => {
         }
 
         req.session.user = email; // Set session to indicate user is logged in
-        res.redirect('/galleries'); // Redirect to galleries page after successful login
+        res.redirect('/manage-galleries'); // Redirect to galleries page after successful login
     });
 });
 
-// Galleries route
-app.get('/galleries', (req, res) => {
+// Route for rendering the page with galleries
+app.get('/manage-galleries', (req, res) => {
+    // Fetch galleries from the database
+    db.all('SELECT * FROM galleries', (err, rows) => {
+        if (err) {
+            console.error('Error fetching galleries:', err.message);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        // Render the page with fetched galleries and username
+        res.render('manage-galleries', { galleries: rows, username: req.session.user });
+    });
+});
+
+// Route for creating a new gallery
+app.post('/create-gallery', (req, res) => {
     // Check if user is logged in
     if (!req.session.user) {
-        return res.redirect('/login'); // Redirect to login page if user is not logged in
+        return res.status(401).send('Unauthorized');
     }
 
-    // Render galleries page with list of galleries
-    res.render('galleries', { username: req.session.user });
+    const { galleryTitle, galleryDate } = req.body;
+
+    // Validate input (gallery title and date)
+    if (!galleryTitle || !galleryDate) {
+        return res.status(400).send('Gallery title and date are required');
+    }
+
+    // Insert the new gallery into the database with the selected date
+    db.run('INSERT INTO galleries (title, date) VALUES (?, ?)', [galleryTitle, galleryDate], (err) => {
+        if (err) {
+            console.error('Error creating gallery:', err.message);
+            return res.status(500).send('Internal Server Error');
+        }
+        res.redirect('/manage-galleries'); // Redirect to manage galleries page after successful creation
+    });
 });
+
+// Function to format date as "DD/MM/YYYY"
+function formatDate(date) {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+}
 
 // Start the server
 app.listen(port, () => {
