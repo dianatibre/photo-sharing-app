@@ -4,6 +4,9 @@ const db = require('./db'); // Import the SQLite database connection
 const app = express();
 const port = 3000;
 
+// Set EJS as the view engine
+app.set('view engine', 'ejs');
+
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
