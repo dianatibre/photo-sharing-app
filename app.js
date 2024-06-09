@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const app = express();
 const port = 3000;
+const path = require('path');
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
@@ -26,8 +27,12 @@ const db = new sqlite3.Database('./photo-sharing.db');
 // Import authRoutes
 const authRoutes = require('./routes/authRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 app.use(authRoutes);
 app.use(galleryRoutes);
+app.use(uploadRoutes);
+
+app.use(express.static(path.join(__dirname, 'uploads')));
 
 // Start the server
 app.listen(port, () => {

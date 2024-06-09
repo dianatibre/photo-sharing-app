@@ -7,7 +7,7 @@ body, h1, h2, h3, p, ul, li, form, input, button {
 
 /* Global styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: "Avenir Next", Arial, sans-serif;
     background-color: #f5f5f5;
     color: #333;
     line-height: 1.6;
@@ -63,6 +63,8 @@ h2 {
 form {
     max-width: 400px;
     margin: 0 auto;
+    text-align: center;
+    margin-top: 20px;
 }
 
 input, button {
@@ -93,4 +95,27 @@ footer {
 
 footer p {
     font-size: 14px;
+}
+
+h1, h3 {
+    text-align: center;
+}
+
+.photo-grid {
+    display: flex;
+    flex-wrap: wrap;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    justify-content: center; /* Center the grid items */
+}
+
+.photo-item {
+    margin: 10px;
+}
+
+.photo {
+    width: 150px;
+    height: auto;
+    display: block;
 }

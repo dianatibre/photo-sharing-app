@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./photo-sharing.db');
-const multer = require('multer'); // For handling file uploads
-const upload = multer({ dest: 'uploads/' }); // Set upload destination folder
+const fs = require('fs');
+const path = require('path');
 
 // Route for rendering the page with galleries
 router.get('/manage-galleries', (req, res) => {
@@ -91,49 +91,50 @@ router.get('/gallery/:id/manage-gallery', (req, res) => {
     });
 });
 
-
-
-// Route for uploading a new picture to a gallery
-router.post('/gallery/:id/upload-picture', upload.single('picture'), (req, res) => {
-    const galleryId = req.params.id;
-    const pictureFile = req.file;
-
-    // Logic to save pictureFile.filename to the database for the specified gallery
-    // Redirect back to the manage pictures page
-});
-
-// Route for deleting a picture from a gallery
-router.delete('/gallery/:galleryId/picture/:pictureId', (req, res) => {
-    const { galleryId, pictureId } = req.params;
-
-    // Logic to delete the specified picture from the database
-    // Redirect back to the manage pictures page
-});
-
 // Route for deleting the entire gallery
 router.post('/gallery/:id/delete', (req, res) => {
     const galleryId = req.params.id;
 
-    // Step 1: Delete pictures associated with the gallery
-    db.run('DELETE FROM photos WHERE galleryId = ?', [galleryId], (err) => {
+    // Step 1: Retrieve filenames of photos associated with the gallery
+    db.all('SELECT filename FROM photos WHERE galleryId = ?', [galleryId], (err, rows) => {
         if (err) {
-            console.error('Error deleting pictures:', err);
+            console.error('Error retrieving photo filenames:', err);
             return res.status(500).json({ error: 'Internal server error' });
         }
 
-        // Step 2: Delete the gallery itself
-        db.run('DELETE FROM galleries WHERE id = ?', [galleryId], (err) => {
+        // Step 2: Delete records of photos from the photos table
+        db.run('DELETE FROM photos WHERE galleryId = ?', [galleryId], (err) => {
             if (err) {
-                console.error('Error deleting gallery:', err);
+                console.error('Error deleting pictures:', err);
                 return res.status(500).json({ error: 'Internal server error' });
             }
 
-            // Gallery and associated pictures successfully deleted
-            // Redirect back to the gallery management page
-            res.redirect('/manage-galleries');
+            // Step 3: Delete actual photo files from the uploads folder
+            rows.forEach(row => {
+                const filePath = path.join(__dirname, '../', row.filename);
+                fs.unlink(filePath, (err) => {
+                    if (err) {
+                        console.error('Error deleting file:', err);
+                        return res.status(500).json({ error: 'Internal server error' });
+                    }
+                });
+            });
+
+            // Step 4: Delete the gallery itself
+            db.run('DELETE FROM galleries WHERE id = ?', [galleryId], (err) => {
+                if (err) {
+                    console.error('Error deleting gallery:', err);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+
+                // Gallery and associated pictures successfully deleted
+                // Redirect back to the gallery management page
+                res.redirect('/manage-galleries');
+            });
         });
     });
 });
+
 
 
 module.exports = router;
